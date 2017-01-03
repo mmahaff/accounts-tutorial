@@ -1,9 +1,11 @@
 @Record = React.createClass
   getInitialState: ->
     edit: false
+
   handleToggle: (e) ->
     e.preventDefault()
     @setState edit: !@state.edit
+
   handleDelete: (e) ->
     e.preventDefault()
     $.ajax
@@ -12,6 +14,23 @@
       dataType: 'JSON'
       success: () =>
         @props.handleDeleteRecord @props.record
+
+  handleEdit: (e) ->
+    e.preventDefault()
+    data =
+      title: ReactDOM.findDOMNode(@refs.title).value
+      date: ReactDOM.findDOMNode(@refs.date).value
+      amount: ReactDOM.findDOMNode(@refs.amount).value
+    $.ajax
+      method: 'PUT'
+      url: "/records/#{ @props.record.id }"
+      dataType: 'JSON'
+      data:
+        record: data
+      success: (data) =>
+        @setState edit: false
+        @props.handleEditRecord @props.record, data
+
   recordRow: ->
     React.DOM.tr null,
       React.DOM.td null, @props.record.date
@@ -26,6 +45,7 @@
           className: 'btn btn-danger'
           onClick: @handleDelete
           'Delete'
+
   recordForm: ->
     React.DOM.tr null,
       React.DOM.td null,
@@ -51,10 +71,11 @@
           className: 'btn btn-default'
           onClick: @handleEdit
           'Update'
-      React.DOM.a
-        className: 'btn btn-danger'
-        onClick: @handleToggle
-        'Cancel'
+        React.DOM.a
+          className: 'btn btn-danger'
+          onClick: @handleToggle
+          'Cancel'
+
   render: ->
     if @state.edit
       @recordForm()
